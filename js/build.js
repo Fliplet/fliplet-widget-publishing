@@ -34,7 +34,7 @@
  */
 
 // Publishing Widget Instance
-Fliplet.Widget.instance('publishing-1-0-0', function (data) {
+Fliplet.Widget.instance('com-fliplet-publishing', function (data) {
   var element = this;
   var $element = $(element);
   
