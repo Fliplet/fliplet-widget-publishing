@@ -100,6 +100,9 @@ Fliplet.Widget.instance('com-fliplet-publishing', function (data) {
   }
   
   function setupPlatformSelection() {
+    // Load platform statuses on initialization
+    loadPlatformStatuses();
+    
     // Platform card selection
     $element.on('click', '.platform-card', function() {
       var platform = $(this).data('platform');
@@ -336,5 +339,120 @@ Fliplet.Widget.instance('com-fliplet-publishing', function (data) {
       button.prop('disabled', false);
       button.html(originalText);
     }
+  }
+  
+  // Platform Status Functions
+  async function loadPlatformStatuses() {
+    if (!state.service) return;
+    
+    // Check both iOS and Android statuses in parallel
+    const platforms = ['ios', 'android'];
+    
+    for (const platform of platforms) {
+      try {
+        updatePlatformStatus(platform, 'checking', 'Checking status...');
+        const submissionState = await state.service.getSubmissionState(platform);
+        updatePlatformDisplay(platform, submissionState);
+      } catch (error) {
+        console.error(`Failed to load ${platform} status:`, error);
+        updatePlatformStatus(platform, 'not-started', 'Ready to start');
+        updatePlatformProgress(platform, 'initialize', []);
+      }
+    }
+  }
+  
+  function updatePlatformDisplay(platform, submissionState) {
+    const { submission, currentStep } = submissionState;
+    
+    if (!submission || submissionState.needsNewSubmission) {
+      updatePlatformStatus(platform, 'not-started', 'Ready to start');
+      updatePlatformProgress(platform, 'initialize', []);
+      return;
+    }
+    
+    // Determine overall status
+    let statusClass, statusText;
+    if (submission.status === 'completed') {
+      statusClass = 'completed';
+      statusText = 'Published';
+    } else if (submission.status === 'failed') {
+      statusClass = 'failed';
+      statusText = 'Failed';
+    } else if (submission.status === 'started') {
+      statusClass = 'in-progress';
+      statusText = `In progress (${getStepDisplayName(currentStep)})`;
+    } else {
+      statusClass = 'not-started';
+      statusText = 'Ready to start';
+    }
+    
+    updatePlatformStatus(platform, statusClass, statusText);
+    
+    // Update progress steps
+    const completedSteps = getCompletedSteps(submission, platform);
+    updatePlatformProgress(platform, currentStep, completedSteps);
+  }
+  
+  function updatePlatformStatus(platform, statusClass, statusText) {
+    const indicator = $element.find(`#${platform}-status-indicator`);
+    const text = $element.find(`#${platform}-status-text`);
+    
+    // Remove all status classes and add the current one
+    indicator.removeClass('not-started in-progress completed failed checking')
+             .addClass(statusClass);
+    
+    text.text(statusText);
+  }
+  
+  function updatePlatformProgress(platform, currentStep, completedSteps) {
+    const progressContainer = $element.find(`#${platform}-progress`);
+    const stepItems = progressContainer.find('.step-item');
+    
+    stepItems.each(function() {
+      const $stepItem = $(this);
+      const stepName = $stepItem.data('step');
+      
+      // Remove all status classes
+      $stepItem.removeClass('completed current pending');
+      
+      if (completedSteps.includes(stepName)) {
+        $stepItem.addClass('completed');
+      } else if (stepName === currentStep) {
+        $stepItem.addClass('current');
+      } else {
+        $stepItem.addClass('pending');
+      }
+    });
+  }
+  
+  function getCompletedSteps(submission, platform) {
+    if (!submission || !submission.data) return [];
+    
+    const dataStatus = submission.data.status;
+    const completedSteps = [];
+    
+    // Map data statuses to completed steps
+    const statusMap = {
+      'STORE_CONFIG_SUBMITTED': platform === 'ios' ? ['api-key', 'bundle-cert'] : ['bundle-keystore'],
+      'PUSH_NOTIFICATION_CONFIGURED': platform === 'ios' ? ['api-key', 'bundle-cert', 'push-config'] : ['bundle-keystore', 'push-config'],
+      'METADATA_SUBMITTED': platform === 'ios' ? ['api-key', 'bundle-cert', 'push-config', 'app-store-listing'] : ['bundle-keystore', 'push-config', 'app-store-listing'],
+      'BUILD_TRIGGERED': platform === 'ios' ? ['api-key', 'bundle-cert', 'push-config', 'app-store-listing', 'build'] : ['bundle-keystore', 'push-config', 'app-store-listing', 'build']
+    };
+    
+    return statusMap[dataStatus] || [];
+  }
+  
+  function getStepDisplayName(step) {
+    const stepNames = {
+      'initialize': 'Starting',
+      'api-key': 'API Key',
+      'bundle-cert': 'Bundle & Cert',
+      'bundle-keystore': 'Bundle & Key',
+      'push-config': 'Push Config',
+      'app-store-listing': 'Store Listing',
+      'build': 'Building'
+    };
+    
+    return stepNames[step] || step;
   }
 });

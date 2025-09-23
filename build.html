@@ -10,28 +10,71 @@
             <div class="publishing-card-body">
                 <div class="platform-cards">
                     <div class="platform-card" data-platform="ios">
-                        <div class="platform-icon">📱</div>
+                        <div class="platform-header">
+                            <div class="platform-icon">📱</div>
+                            <div class="platform-status">
+                                <div class="status-indicator" id="ios-status-indicator"></div>
+                                <span class="status-text" id="ios-status-text">Checking...</span>
+                            </div>
+                        </div>
                         <h3>iOS App Store</h3>
                         <p class="text-muted">Publish to Apple's App Store</p>
-                        <ul class="text-sm text-muted mt-3" style="list-style: none; padding: 0;">
-                            <li>• API Key Configuration</li>
-                            <li>• Certificate Management</li>
-                            <li>• Bundle ID Selection</li>
-                            <li>• Push Notifications</li>
-                            <li>• App Store Listing</li>
-                        </ul>
+                        <div class="platform-progress" id="ios-progress">
+                            <div class="progress-steps">
+                                <div class="step-item" data-step="api-key">
+                                    <span class="step-icon">🔑</span>
+                                    <span class="step-label">API Key</span>
+                                </div>
+                                <div class="step-item" data-step="bundle-cert">
+                                    <span class="step-icon">📋</span>
+                                    <span class="step-label">Bundle & Cert</span>
+                                </div>
+                                <div class="step-item" data-step="push-config">
+                                    <span class="step-icon">🔔</span>
+                                    <span class="step-label">Push Config</span>
+                                </div>
+                                <div class="step-item" data-step="app-store-listing">
+                                    <span class="step-icon">📝</span>
+                                    <span class="step-label">Store Listing</span>
+                                </div>
+                                <div class="step-item" data-step="build">
+                                    <span class="step-icon">🚀</span>
+                                    <span class="step-label">Build</span>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                     
                     <div class="platform-card" data-platform="android">
-                        <div class="platform-icon">🤖</div>
+                        <div class="platform-header">
+                            <div class="platform-icon">🤖</div>
+                            <div class="platform-status">
+                                <div class="status-indicator" id="android-status-indicator"></div>
+                                <span class="status-text" id="android-status-text">Checking...</span>
+                            </div>
+                        </div>
                         <h3>Google Play Store</h3>
                         <p class="text-muted">Publish to Google Play Store</p>
-                        <ul class="text-sm text-muted mt-3" style="list-style: none; padding: 0;">
-                            <li>• Bundle ID Configuration</li>
-                            <li>• Keystore Management</li>
-                            <li>• Push Notifications</li>
-                            <li>• Play Store Listing</li>
-                        </ul>
+                        <div class="platform-progress" id="android-progress">
+                            <div class="progress-steps">
+                                <div class="step-item" data-step="bundle-keystore">
+                                    <span class="step-icon">🗝️</span>
+                                    <span class="step-label">Bundle & Key</span>
+                                </div>
+                                <div class="step-item" data-step="push-config">
+                                    <span class="step-icon">🔔</span>
+                                    <span class="step-label">Push Config</span>
+                                </div>
+                                <div class="step-item" data-step="app-store-listing">
+                                    <span class="step-icon">📝</span>
+                                    <span class="step-label">Store Listing</span>
+                                </div>
+                                <div class="step-item" data-step="build">
+                                    <span class="step-icon">🚀</span>
+                                    <span class="step-label">Build</span>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
                 
