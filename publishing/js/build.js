@@ -8,4 +8,17 @@ Fliplet.Widget.instance('publishing-1-0-0', function (data) {
 
   // Sample implementation to initialise the widget
   var foo = new mySampleCoreLibrary(element, data);
+
+  // Handle form submission to show alert
+  $(element).find('.form-alert').on('submit', function(e) {
+    e.preventDefault();
+
+    var userInput = $(this).find('#userInput').val();
+
+    if (userInput.trim()) {
+      alert(userInput);
+    } else {
+      alert('Please enter some text!');
+    }
+  });
 });
