@@ -183,7 +183,7 @@ class PublishingService {
             
             // Check if app is published
             if (!appResponse.app.productionAppId) {
-                const publishEndpoint = `v1/apps/${this.appId}/publish`);
+                const publishEndpoint = `v1/apps/${this.appId}/publish`;
                 await Fliplet.API.request(publishEndpoint, 'POST');
             }
             
