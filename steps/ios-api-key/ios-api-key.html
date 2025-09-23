@@ -1,0 +1,72 @@
+<!-- iOS API Key Configuration Step -->
+<div class="ios-api-key-container">
+    <div class="publishing-card">
+        <div class="publishing-card-header">
+            <div class="step-header">
+                <button class="btn btn-secondary btn-sm" id="back-btn">← Back</button>
+                <h2>iOS API Key Configuration</h2>
+            </div>
+            <div class="steps">
+                <div class="step active">
+                    <div class="step-circle">1</div>
+                    <div class="step-label">API Key</div>
+                </div>
+                <div class="step">
+                    <div class="step-circle">2</div>
+                    <div class="step-label">Bundle & Certificate</div>
+                </div>
+                <div class="step">
+                    <div class="step-circle">3</div>
+                    <div class="step-label">Push Config</div>
+                </div>
+                <div class="step">
+                    <div class="step-circle">4</div>
+                    <div class="step-label">App Store Listing</div>
+                </div>
+                <div class="step">
+                    <div class="step-circle">5</div>
+                    <div class="step-label">Build</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="publishing-card-body">
+            <div id="api-key-form">
+                <div class="form-group">
+                    <label class="form-label">Select or Create API Key</label>
+                    <select id="api-key-select" class="form-control">
+                        <option value="">Loading API keys...</option>
+                    </select>
+                    <button id="create-new-api-key" class="btn btn-secondary btn-sm mt-2">Create New API Key</button>
+                </div>
+                
+                <div id="new-api-key-form" class="d-none">
+                    <div class="form-group">
+                        <label class="form-label">API Key Name</label>
+                        <input type="text" id="api-key-name" class="form-control" placeholder="Enter API key name">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Key ID</label>
+                        <input type="text" id="api-key-id" class="form-control" placeholder="Enter key ID">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Issuer ID</label>
+                        <input type="text" id="api-issuer-id" class="form-control" placeholder="Enter issuer ID">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Private Key (.p8 file)</label>
+                        <div class="file-upload">
+                            <input type="file" id="api-private-key" accept=".p8">
+                            <label for="api-private-key" class="file-upload-label">Choose File</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="publishing-card-footer">
+            <button id="validate-api-key" class="btn btn-secondary">Validate Key</button>
+            <button id="continue-api-key" class="btn btn-primary btn-lg">Continue</button>
+        </div>
+    </div>
+</div>

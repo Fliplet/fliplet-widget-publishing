@@ -1,0 +1,235 @@
+/* Dashboard Step Styles */
+.dashboard-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: var(--spacing-lg);
+}
+
+/* Platform Cards */
+.platform-cards {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--spacing-lg);
+  margin-bottom: var(--spacing-lg);
+}
+
+.platform-card {
+  background: var(--background);
+  border: 2px solid var(--border-color);
+  border-radius: var(--border-radius);
+  padding: var(--spacing-lg);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+.platform-card:hover {
+  border-color: var(--primary-color);
+  box-shadow: 0 4px 12px rgba(0, 123, 255, 0.15);
+  transform: translateY(-2px);
+}
+
+.platform-card.selected {
+  border-color: var(--primary-color);
+  background-color: #f8f9ff;
+  box-shadow: 0 4px 12px rgba(0, 123, 255, 0.2);
+}
+
+/* Platform Header */
+.platform-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--spacing-md);
+}
+
+.platform-icon {
+  font-size: 2.5rem;
+  margin-bottom: var(--spacing-sm);
+}
+
+.platform-status {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+}
+
+.status-indicator {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background-color: var(--text-muted);
+}
+
+.status-indicator.not-started {
+  background-color: var(--text-muted);
+}
+
+.status-indicator.checking {
+  background-color: var(--info-color);
+  animation: pulse 1s ease-in-out infinite alternate;
+}
+
+.status-indicator.in-progress {
+  background-color: var(--warning-color);
+  animation: pulse 2s ease-in-out infinite alternate;
+}
+
+.status-indicator.completed {
+  background-color: var(--success-color);
+}
+
+.status-indicator.failed {
+  background-color: var(--danger-color);
+}
+
+.status-text {
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+@keyframes pulse {
+  from { opacity: 1; }
+  to { opacity: 0.5; }
+}
+
+/* Platform Titles */
+.platform-card h3 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-bottom: var(--spacing-sm);
+  color: var(--dark-color);
+}
+
+.platform-card p {
+  color: var(--text-muted);
+  margin-bottom: var(--spacing-md);
+}
+
+/* Platform Progress Steps */
+.platform-progress {
+  margin-top: var(--spacing-md);
+}
+
+.progress-steps {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-xs);
+}
+
+.step-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: var(--spacing-sm);
+  border-radius: var(--border-radius);
+  background-color: var(--light-color);
+  border: 1px solid var(--border-color);
+  flex: 1;
+  min-width: 60px;
+  transition: all 0.2s ease;
+}
+
+.step-item.completed {
+  background-color: #d4edda;
+  border-color: var(--success-color);
+  color: #155724;
+}
+
+.step-item.current {
+  background-color: #fff3cd;
+  border-color: var(--warning-color);
+  color: #856404;
+}
+
+.step-item.pending {
+  background-color: var(--light-color);
+  border-color: var(--border-color);
+  color: var(--text-muted);
+}
+
+.step-icon {
+  font-size: 1rem;
+  margin-bottom: var(--spacing-xs);
+}
+
+.step-label {
+  font-size: 0.7rem;
+  font-weight: 500;
+  text-align: center;
+  line-height: 1.2;
+}
+
+/* Continue Button Area */
+.publishing-card-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--spacing-lg);
+  border-top: 1px solid var(--border-color);
+  background-color: var(--light-color);
+}
+
+#continue-btn {
+  padding: var(--spacing-md) var(--spacing-lg);
+  font-size: 1.125rem;
+  border-radius: var(--border-radius);
+  border: none;
+  background-color: var(--primary-color);
+  color: white;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+#continue-btn:hover:not(:disabled) {
+  background-color: var(--primary-hover);
+}
+
+#continue-btn:disabled {
+  background-color: var(--text-muted);
+  cursor: not-allowed;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .platform-cards {
+    grid-template-columns: 1fr;
+    gap: var(--spacing-md);
+  }
+  
+  .progress-steps {
+    flex-direction: column;
+    gap: var(--spacing-xs);
+  }
+  
+  .step-item {
+    flex-direction: row;
+    min-width: auto;
+    text-align: left;
+    justify-content: flex-start;
+  }
+  
+  .step-icon {
+    margin-bottom: 0;
+    margin-right: var(--spacing-sm);
+  }
+  
+  .publishing-card-footer {
+    flex-direction: column;
+    gap: var(--spacing-md);
+  }
+  
+  .dashboard-container {
+    padding: var(--spacing-md);
+  }
+}
+
+/* Platform Info Alert */
+.alert.alert-info {
+  background-color: #d1ecf1;
+  border: 1px solid #bee5eb;
+  color: #0c5460;
+  padding: var(--spacing-md);
+  border-radius: var(--border-radius);
+  margin-top: var(--spacing-md);
+}

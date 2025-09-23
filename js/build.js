@@ -38,20 +38,18 @@ Fliplet.Widget.instance('com-fliplet-publishing', function (data) {
   var element = this;
   var $element = $(element);
   
-  console.log('Publishing widget instance created with data:', data);
-  
   // Widget state
   var state = {
     service: null,
-    currentScreen: 'platform-selection',
+    currentStep: 'dashboard',
     selectedPlatform: null,
     submissionId: null,
-    organizationId: null
+    organizationId: null,
+    stepInstance: null
   };
   
   // Wait for Fliplet to be ready before initializing
   Fliplet().then(function() {
-    console.log('Fliplet is ready, initializing publishing widget...');
     init();
   }).catch(function(error) {
     console.error('Failed to wait for Fliplet ready:', error);
@@ -61,10 +59,6 @@ Fliplet.Widget.instance('com-fliplet-publishing', function (data) {
   
   function init() {
     try {
-      console.log('Publishing widget initializing...');
-      console.log('Fliplet.Navigate.query:', Fliplet.Navigate.query);
-      console.log('Fliplet.Env.get("user"):', Fliplet.Env.get('user'));
-      
       // Get app configuration from query parameters or user environment
       var config = {
         appId: Fliplet.Navigate.query.appId,
@@ -72,41 +66,124 @@ Fliplet.Widget.instance('com-fliplet-publishing', function (data) {
         region: Fliplet.Navigate.query.region || 'eu'
       };
       
-      console.log('Publishing widget config:', config);
-      
       // Validate required parameters
       if (!config.appId) {
-        console.error('appId is missing from query parameters');
         throw new Error('appId is required. Please provide it as a query parameter: ?appId=YOUR_APP_ID');
       }
       if (!config.token) {
-        console.error('token is missing from query parameters and user environment');
         throw new Error('Authentication token is required. Please provide it as query parameter or ensure user is logged in.');
       }
       
       // Initialize publishing service
-      console.log('Creating PublishingService with config:', config);
       state.service = new PublishingService({
         appId: config.appId,
         token: config.token,
         region: config.region
       });
-      console.log('PublishingService created successfully');
       
-      // Set up screen management
-      console.log('Setting up screens...');
-      setupScreens();
-      
-      // Show initial screen
-      console.log('Showing platform-selection screen...');
-      showScreen('platform-selection');
-      
-      console.log('Publishing widget initialization completed successfully');
+      // Load initial step (dashboard)
+      loadStep('dashboard');
       
     } catch (error) {
       console.error('Failed to initialize publishing widget:', error);
       showError('Failed to initialize publishing widget: ' + error.message);
     }
+  }
+  
+  // Step Management Functions
+  async function loadStep(stepName) {
+    try {
+      var $container = $element.find('#step-container');
+      
+      // Load step HTML
+      var stepHTML = await loadStepHTML(stepName);
+      $container.html(stepHTML);
+      
+      // Load step CSS
+      await loadStepCSS(stepName);
+      
+      // Load and initialize step JS
+      await loadStepJS(stepName, $container);
+      
+      state.currentStep = stepName;
+      
+    } catch (error) {
+      console.error('Failed to load step:', stepName, error);
+      showError('Failed to load step: ' + error.message);
+    }
+  }
+  
+  function loadStepHTML(stepName) {
+    return new Promise(function(resolve, reject) {
+      $.get('steps/' + stepName + '/' + stepName + '.html')
+        .done(resolve)
+        .fail(function() {
+          reject(new Error('Failed to load HTML for step: ' + stepName));
+        });
+    });
+  }
+  
+  function loadStepCSS(stepName) {
+    return new Promise(function(resolve) {
+      // Check if CSS is already loaded
+      if ($('link[href*="' + stepName + '.css"]').length > 0) {
+        resolve();
+        return;
+      }
+      
+      var link = document.createElement('link');
+      link.rel = 'stylesheet';
+      link.href = 'steps/' + stepName + '/' + stepName + '.css';
+      link.onload = resolve;
+      link.onerror = resolve; // Don't fail if CSS doesn't load
+      document.head.appendChild(link);
+    });
+  }
+  
+  function loadStepJS(stepName, $container) {
+    return new Promise(function(resolve, reject) {
+      $.getScript('steps/' + stepName + '/' + stepName + '.js')
+        .done(function() {
+          // Initialize step based on step name
+          if (stepName === 'dashboard') {
+            state.stepInstance = new DashboardStep(state.service, $container);
+            
+            // Listen for navigation events
+            $container.on('dashboard:navigate', function(event, data) {
+              state.selectedPlatform = data.platform;
+              loadStep(data.nextStep);
+            });
+            
+            state.stepInstance.init();
+          } else if (stepName === 'ios-api-key') {
+            state.stepInstance = new IOSAPIKeyStep(state.service, $container);
+            
+            // Listen for navigation events
+            $container.on('ios-api-key:navigate', function(event, data) {
+              if (data.submissionId) {
+                state.submissionId = data.submissionId;
+              }
+              if (data.platform) {
+                state.selectedPlatform = data.platform;
+              }
+              loadStep(data.nextStep);
+            });
+            
+            // Pass existing submission ID if available
+            if (state.submissionId) {
+              state.stepInstance.setSubmissionId(state.submissionId);
+            }
+            
+            state.stepInstance.init();
+          }
+          // Add other step initializations here
+          
+          resolve();
+        })
+        .fail(function() {
+          reject(new Error('Failed to load JavaScript for step: ' + stepName));
+        });
+    });
   }
   
   function setupScreens() {
@@ -366,34 +443,22 @@ Fliplet.Widget.instance('com-fliplet-publishing', function (data) {
   
   // Platform Status Functions
   async function loadPlatformStatuses() {
-    console.log('loadPlatformStatuses called, state.service:', state.service);
-    if (!state.service) {
-      console.error('PublishingService not available, cannot load platform statuses');
-      return;
-    }
+    if (!state.service) return;
     
     // Check both iOS and Android statuses in parallel
     const platforms = ['ios', 'android'];
-    console.log('Loading platform statuses for:', platforms);
     
     for (const platform of platforms) {
       try {
-        console.log(`Loading status for platform: ${platform}`);
         updatePlatformStatus(platform, 'checking', 'Checking status...');
-        
-        console.log(`Calling getSubmissionState for platform: ${platform}`);
         const submissionState = await state.service.getSubmissionState(platform);
-        console.log(`Received submission state for ${platform}:`, submissionState);
-        
         updatePlatformDisplay(platform, submissionState);
-        console.log(`Updated display for platform: ${platform}`);
       } catch (error) {
         console.error(`Failed to load ${platform} status:`, error);
         updatePlatformStatus(platform, 'not-started', 'Ready to start');
         updatePlatformProgress(platform, 'initialize', []);
       }
     }
-    console.log('Platform statuses loading completed');
   }
   
   function updatePlatformDisplay(platform, submissionState) {
