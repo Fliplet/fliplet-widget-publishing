@@ -53,7 +53,7 @@ class PublishingService {
         /** @type {Object|null} - Current active submission */
         this.currentSubmission = null;
         
-        // Note: Using Fliplet.API.request directly instead of config.ajax
+        // Using Fliplet.API.request directly for REST API calls
         
         /**
          * Submission status constants
@@ -176,15 +176,27 @@ class PublishingService {
     async initializeApp() {
         try {
             // Get app details
-            const appEndpoint = `v1/apps/${this.appId}`);
-            const appResponse = await Fliplet.API.request(appEndpoint, 'GET');
+            const appEndpoint = `v1/apps/${this.appId}`;
+            const appResponse = await Fliplet.API.request({
+                url: appEndpoint,
+                method: 'GET',
+                headers: {
+                    'Auth-token': this.token
+                }
+            });
             
             this.organizationId = appResponse.app.organizationId;
             
             // Check if app is published
             if (!appResponse.app.productionAppId) {
                 const publishEndpoint = `v1/apps/${this.appId}/publish`;
-                await Fliplet.API.request(publishEndpoint, 'POST');
+                await Fliplet.API.request({
+                    url: publishEndpoint,
+                    method: 'POST',
+                    headers: {
+                        'Auth-token': this.token
+                    }
+                });
             }
             
             return {
@@ -204,7 +216,13 @@ class PublishingService {
         this.validatePlatform(platform);
         
         try {
-            const response = await Fliplet.API.request(`v2/apps/${this.appId}/submissions/latest?platform=${platform}`);
+            const response = await Fliplet.API.request({
+                url: `v2/apps/${this.appId}/submissions/latest?platform=${platform}`,
+                method: 'GET',
+                headers: {
+                    'Auth-token': this.token
+                }
+            });
             
             this.currentSubmission = response;
             
@@ -300,8 +318,15 @@ class PublishingService {
         }
         
         try {
-            const endpoint = `v2/apps/${this.appId}/submissions/initialize`);
-            const response = await Fliplet.API.request(endpoint, 'POST', payload);
+            const endpoint = `v2/apps/${this.appId}/submissions/initialize`;
+            const response = await Fliplet.API.request({
+            url: endpoint,
+            method: 'POST',
+            data: payload,
+            headers: {
+                'Auth-token': this.token
+            }
+        });
             
             this.currentSubmission = response.submission;
             
@@ -328,8 +353,14 @@ class PublishingService {
         }
         
         try {
-            const endpoint = `v2/organizations/${this.organizationId}/credentials/api-keys`);
-            const response = await Fliplet.API.request(endpoint, 'GET');
+            const endpoint = `v2/organizations/${this.organizationId}/credentials/api-keys`;
+            const response = await Fliplet.API.request({
+            url: endpoint,
+            method: 'GET',
+            headers: {
+                'Auth-token': this.token
+            }
+        });
             
             return {
                 success: true,
@@ -354,8 +385,15 @@ class PublishingService {
         }
         
         try {
-            const endpoint = `v2/organizations/${this.organizationId}/credentials/api-key`);
-            const response = await Fliplet.API.request(endpoint, 'POST', keyData);
+            const endpoint = `v2/organizations/${this.organizationId}/credentials/api-key`;
+            const response = await Fliplet.API.request({
+            url: endpoint,
+            method: 'POST',
+            data: keyData,
+            headers: {
+                'Auth-token': this.token
+            }
+        });
             
             return {
                 success: true,
@@ -379,8 +417,15 @@ class PublishingService {
         }
         
         try {
-            const endpoint = `v2/organizations/${this.organizationId}/credentials/api-key/validate`);
-            const response = await Fliplet.API.request(endpoint, 'POST', keyData);
+            const endpoint = `v2/organizations/${this.organizationId}/credentials/api-key/validate`;
+            const response = await Fliplet.API.request({
+            url: endpoint,
+            method: 'POST',
+            data: keyData,
+            headers: {
+                'Auth-token': this.token
+            }
+        });
             
             return {
                 success: true,
@@ -405,8 +450,15 @@ class PublishingService {
         }
         
         try {
-            const endpoint = `v2/organizations/${this.organizationId}/credentials/ios/certificate/check`);
-            const response = await Fliplet.API.request(endpoint, 'POST', { teamId });
+            const endpoint = `v2/organizations/${this.organizationId}/credentials/ios/certificate/check`;
+            const response = await Fliplet.API.request({
+            url: endpoint,
+            method: 'POST',
+            data: { teamId },
+            headers: {
+                'Auth-token': this.token
+            }
+        });
             
             return {
                 success: true,
@@ -428,8 +480,15 @@ class PublishingService {
         }
         
         try {
-            const endpoint = `v2/organizations/${this.organizationId}/credentials/ios/certificate/generate`);
-            const response = await Fliplet.API.request(endpoint, 'POST', { teamId });
+            const endpoint = `v2/organizations/${this.organizationId}/credentials/ios/certificate/generate`;
+            const response = await Fliplet.API.request({
+            url: endpoint,
+            method: 'POST',
+            data: { teamId },
+            headers: {
+                'Auth-token': this.token
+            }
+        });
             
             return {
                 success: true,
@@ -450,9 +509,16 @@ class PublishingService {
         }
         
         try {
-            const endpoint = `v2/organizations/${this.organizationId}/credentials/ios/certificate/upload`);
+            const endpoint = `v2/organizations/${this.organizationId}/credentials/ios/certificate/upload`;
             const payload = { teamId, ...certificateData };
-            const response = await Fliplet.API.request(endpoint, 'PUT', payload);
+            const response = await Fliplet.API.request({
+            url: endpoint,
+            method: 'PUT',
+            data: payload,
+            headers: {
+                'Auth-token': this.token
+            }
+        });
             
             return {
                 success: true,
@@ -473,8 +539,15 @@ class PublishingService {
         }
         
         try {
-            const endpoint = `v2/organizations/${this.organizationId}/apple/bundle-ids`);
-            const response = await Fliplet.API.request(endpoint, 'GET', { teamId });
+            const endpoint = `v2/organizations/${this.organizationId}/apple/bundle-ids`;
+            const response = await Fliplet.API.request({
+            url: endpoint,
+            method: 'GET',
+            data: { teamId },
+            headers: {
+                'Auth-token': this.token
+            }
+        });
             
             return {
                 success: true,
@@ -494,8 +567,15 @@ class PublishingService {
         }
         
         try {
-            const endpoint = `v2/organizations/${this.organizationId}/apple/bundle-ids/${bundleId}`);
-            const response = await Fliplet.API.request(endpoint, 'GET', { teamId });
+            const endpoint = `v2/organizations/${this.organizationId}/apple/bundle-ids/${bundleId}`;
+            const response = await Fliplet.API.request({
+            url: endpoint,
+            method: 'GET',
+            data: { teamId },
+            headers: {
+                'Auth-token': this.token
+            }
+        });
             
             return {
                 success: true,
@@ -520,8 +600,17 @@ class PublishingService {
             formData.append('keystore', keystoreFile);
             formData.append('password', password);
             
-            const endpoint = `v2/apps/${this.appId}/submissions/${submissionId}/keystore`);
-            const response = await Fliplet.API.request(endpoint, 'POST', formData, true);
+            const endpoint = `v2/apps/${this.appId}/submissions/${submissionId}/keystore`;
+            const response = await Fliplet.API.request({
+            url: endpoint,
+            method: 'POST',
+            data: formData,
+            processData: false,
+            contentType: false,
+            headers: {
+                'Auth-token': this.token
+            }
+        });
             
             return {
                 success: true,
@@ -562,8 +651,15 @@ class PublishingService {
         }
         
         try {
-            const endpoint = `v2/apps/${this.appId}/submissions/${submissionId}/store`);
-            const response = await Fliplet.API.request(endpoint, 'PUT', payload);
+            const endpoint = `v2/apps/${this.appId}/submissions/${submissionId}/store`;
+            const response = await Fliplet.API.request({
+            url: endpoint,
+            method: 'PUT',
+            data: payload,
+            headers: {
+                'Auth-token': this.token
+            }
+        });
             
             // Update current submission
             if (this.currentSubmission) {
@@ -584,8 +680,14 @@ class PublishingService {
      */
     async getPushConfig() {
         try {
-            const endpoint = `v1/widget-instances/com.fliplet.push-notifications/settings`);
-            const response = await Fliplet.API.request(endpoint, 'GET');
+            const endpoint = `v1/widget-instances/com.fliplet.push-notifications/settings`;
+            const response = await Fliplet.API.request({
+            url: endpoint,
+            method: 'GET',
+            headers: {
+                'Auth-token': this.token
+            }
+        });
             
             return {
                 success: true,
@@ -610,8 +712,14 @@ class PublishingService {
         }
         
         try {
-            const endpoint = `v2/organizations/${this.organizationId}/credentials/push/${teamId}`);
-            const response = await Fliplet.API.request(endpoint, 'GET');
+            const endpoint = `v2/organizations/${this.organizationId}/credentials/push/${teamId}`;
+            const response = await Fliplet.API.request({
+            url: endpoint,
+            method: 'GET',
+            headers: {
+                'Auth-token': this.token
+            }
+        });
             
             return {
                 success: true,
@@ -632,8 +740,15 @@ class PublishingService {
      */
     async configurePushNotifications(pushConfig) {
         try {
-            const endpoint = `v1/widget-instances/com.fliplet.push-notifications/settings`);
-            const response = await Fliplet.API.request(endpoint, 'PUT', pushConfig);
+            const endpoint = `v1/widget-instances/com.fliplet.push-notifications/settings`;
+            const response = await Fliplet.API.request({
+            url: endpoint,
+            method: 'PUT',
+            data: pushConfig,
+            headers: {
+                'Auth-token': this.token
+            }
+        });
             
             return {
                 success: true,
@@ -649,9 +764,16 @@ class PublishingService {
      */
     async submitPushConfig(submissionId, configType = 'PUSH_CONFIG') {
         try {
-            const endpoint = `v2/apps/${this.appId}/submissions/${submissionId}/metadata`);
+            const endpoint = `v2/apps/${this.appId}/submissions/${submissionId}/metadata`;
             const payload = { type: configType };
-            const response = await Fliplet.API.request(endpoint, 'PUT', payload);
+            const response = await Fliplet.API.request({
+            url: endpoint,
+            method: 'PUT',
+            data: payload,
+            headers: {
+                'Auth-token': this.token
+            }
+        });
             
             // Update current submission
             if (this.currentSubmission) {
@@ -681,8 +803,17 @@ class PublishingService {
                 formData.append(`file${index}`, file);
             });
             
-            const endpoint = `v1/media/files?appId=${this.appId}`);
-            const response = await Fliplet.API.request(endpoint, 'POST', formData, true);
+            const endpoint = `v1/media/files?appId=${this.appId}`;
+            const response = await Fliplet.API.request({
+            url: endpoint,
+            method: 'POST',
+            data: formData,
+            processData: false,
+            contentType: false,
+            headers: {
+                'Auth-token': this.token
+            }
+        });
             
             return {
                 success: true,
@@ -705,8 +836,15 @@ class PublishingService {
         }
         
         try {
-            const endpoint = `v2/apps/${this.appId}/submissions/${submissionId}/metadata`);
-            const response = await Fliplet.API.request(endpoint, 'PUT', metadataPayload);
+            const endpoint = `v2/apps/${this.appId}/submissions/${submissionId}/metadata`;
+            const response = await Fliplet.API.request({
+            url: endpoint,
+            method: 'PUT',
+            data: metadataPayload,
+            headers: {
+                'Auth-token': this.token
+            }
+        });
             
             // Update current submission
             if (this.currentSubmission) {
@@ -732,8 +870,14 @@ class PublishingService {
         }
         
         try {
-            const endpoint = `v2/apps/${this.appId}/submissions/${submissionId}/build`);
-            const response = await Fliplet.API.request(endpoint, 'POST');
+            const endpoint = `v2/apps/${this.appId}/submissions/${submissionId}/build`;
+            const response = await Fliplet.API.request({
+            url: endpoint,
+            method: 'POST',
+            headers: {
+                'Auth-token': this.token
+            }
+        });
             
             // Update current submission
             if (this.currentSubmission) {
@@ -756,8 +900,14 @@ class PublishingService {
      */
     async cancelBuild(submissionId) {
         try {
-            const endpoint = `v2/apps/${this.appId}/submissions/${submissionId}/cancel`);
-            const response = await Fliplet.API.request(endpoint, 'POST');
+            const endpoint = `v2/apps/${this.appId}/submissions/${submissionId}/cancel`;
+            const response = await Fliplet.API.request({
+            url: endpoint,
+            method: 'POST',
+            headers: {
+                'Auth-token': this.token
+            }
+        });
             
             // Update current submission
             if (this.currentSubmission) {
@@ -778,8 +928,14 @@ class PublishingService {
      */
     async getSubmissionById(submissionId) {
         try {
-            const endpoint = `v2/apps/${this.appId}/submissions/${submissionId}`);
-            const response = await Fliplet.API.request(endpoint, 'GET');
+            const endpoint = `v2/apps/${this.appId}/submissions/${submissionId}`;
+            const response = await Fliplet.API.request({
+            url: endpoint,
+            method: 'GET',
+            headers: {
+                'Auth-token': this.token
+            }
+        });
             
             return {
                 success: true,
@@ -800,8 +956,15 @@ class PublishingService {
         if (status) params.status = status;
         
         try {
-            const endpoint = `v2/apps/${this.appId}/submissions`);
-            const response = await Fliplet.API.request(endpoint, 'GET', params);
+            const endpoint = `v2/apps/${this.appId}/submissions`;
+            const response = await Fliplet.API.request({
+            url: endpoint,
+            method: 'GET',
+            data: params,
+            headers: {
+                'Auth-token': this.token
+            }
+        });
             
             return {
                 success: true,
