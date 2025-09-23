@@ -24,6 +24,7 @@
     "assets": [
       "css/build.css",
       "js/libs.js",
+      "js/publishing-service.js",
       "js/build.js"
     ],
     "appAssets": []
