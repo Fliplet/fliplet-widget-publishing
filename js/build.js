@@ -59,13 +59,11 @@ Fliplet.Widget.instance('com-fliplet-publishing', function (data) {
         region: Fliplet.Env.get('region') || 'eu'
       };
       
-      // Initialize publishing service with Fliplet's ajax method
+      // Initialize publishing service
       state.service = new PublishingService({
         appId: config.appId,
         token: config.token,
-        region: config.region,
-        ajax: Fliplet.API.request.bind(Fliplet.API),
-        getRegion: getRegionURL
+        region: config.region
       });
       
       // Set up screen management
@@ -78,12 +76,6 @@ Fliplet.Widget.instance('com-fliplet-publishing', function (data) {
       console.error('Failed to initialize publishing widget:', error);
       showError('Failed to initialize publishing widget: ' + error.message);
     }
-  }
-  
-  function getRegionURL(region) {
-    // Use Fliplet's API URL construction
-    var baseRegion = region || (state.service && state.service.region) || 'eu';
-    return Fliplet.Env.get('apiUrl') || 'https://api.fliplet.com/';
   }
   
   function setupScreens() {

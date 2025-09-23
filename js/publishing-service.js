@@ -36,8 +36,6 @@ class PublishingService {
      * @param {number} config.appId - Fliplet app ID
      * @param {string} config.token - Authentication token
      * @param {string} config.region - API region (eu/us/ca)
-     * @param {Function} config.ajax - HTTP request function
-     * @param {Function} config.getRegion - Region URL builder function
      */
     constructor(config) {
         /** @type {number} - Fliplet application identifier */
@@ -55,11 +53,7 @@ class PublishingService {
         /** @type {Object|null} - Current active submission */
         this.currentSubmission = null;
         
-        /** @type {Function} - HTTP request handler */
-        this.ajax = config.ajax;
-        
-        /** @type {Function} - Region URL builder */
-        this.getRegion = config.getRegion;
+        // Note: Using Fliplet.API.request directly instead of config.ajax
         
         /**
          * Submission status constants
@@ -124,14 +118,6 @@ class PublishingService {
     // =====================================
 
     /**
-     * Construct full API URL with region base
-     */
-    buildURL(endpoint) {
-        const baseURL = this.getRegion();
-        return `${baseURL}${endpoint}`;
-    }
-
-    /**
      * Validate platform parameter
      */
     validatePlatform(platform) {
@@ -190,15 +176,15 @@ class PublishingService {
     async initializeApp() {
         try {
             // Get app details
-            const appURL = this.buildURL(`v1/apps/${this.appId}`);
-            const appResponse = await this.ajax(appURL, 'GET');
+            const appEndpoint = `v1/apps/${this.appId}`);
+            const appResponse = await Fliplet.API.request(appEndpoint, 'GET');
             
             this.organizationId = appResponse.app.organizationId;
             
             // Check if app is published
             if (!appResponse.app.productionAppId) {
-                const publishURL = this.buildURL(`v1/apps/${this.appId}/publish`);
-                await this.ajax(publishURL, 'POST');
+                const publishEndpoint = `v1/apps/${this.appId}/publish`);
+                await Fliplet.API.request(publishEndpoint, 'POST');
             }
             
             return {
@@ -218,8 +204,7 @@ class PublishingService {
         this.validatePlatform(platform);
         
         try {
-            const url = this.buildURL(`v2/apps/${this.appId}/submissions/latest?platform=${platform}`);
-            const response = await this.ajax(url, 'GET');
+            const response = await Fliplet.API.request(`v2/apps/${this.appId}/submissions/latest?platform=${platform}`);
             
             this.currentSubmission = response;
             
@@ -315,8 +300,8 @@ class PublishingService {
         }
         
         try {
-            const url = this.buildURL(`v2/apps/${this.appId}/submissions/initialize`);
-            const response = await this.ajax(url, 'POST', payload);
+            const endpoint = `v2/apps/${this.appId}/submissions/initialize`);
+            const response = await Fliplet.API.request(endpoint, 'POST', payload);
             
             this.currentSubmission = response.submission;
             
@@ -343,8 +328,8 @@ class PublishingService {
         }
         
         try {
-            const url = this.buildURL(`v2/organizations/${this.organizationId}/credentials/api-keys`);
-            const response = await this.ajax(url, 'GET');
+            const endpoint = `v2/organizations/${this.organizationId}/credentials/api-keys`);
+            const response = await Fliplet.API.request(endpoint, 'GET');
             
             return {
                 success: true,
@@ -369,8 +354,8 @@ class PublishingService {
         }
         
         try {
-            const url = this.buildURL(`v2/organizations/${this.organizationId}/credentials/api-key`);
-            const response = await this.ajax(url, 'POST', keyData);
+            const endpoint = `v2/organizations/${this.organizationId}/credentials/api-key`);
+            const response = await Fliplet.API.request(endpoint, 'POST', keyData);
             
             return {
                 success: true,
@@ -394,8 +379,8 @@ class PublishingService {
         }
         
         try {
-            const url = this.buildURL(`v2/organizations/${this.organizationId}/credentials/api-key/validate`);
-            const response = await this.ajax(url, 'POST', keyData);
+            const endpoint = `v2/organizations/${this.organizationId}/credentials/api-key/validate`);
+            const response = await Fliplet.API.request(endpoint, 'POST', keyData);
             
             return {
                 success: true,
@@ -420,8 +405,8 @@ class PublishingService {
         }
         
         try {
-            const url = this.buildURL(`v2/organizations/${this.organizationId}/credentials/ios/certificate/check`);
-            const response = await this.ajax(url, 'POST', { teamId });
+            const endpoint = `v2/organizations/${this.organizationId}/credentials/ios/certificate/check`);
+            const response = await Fliplet.API.request(endpoint, 'POST', { teamId });
             
             return {
                 success: true,
@@ -443,8 +428,8 @@ class PublishingService {
         }
         
         try {
-            const url = this.buildURL(`v2/organizations/${this.organizationId}/credentials/ios/certificate/generate`);
-            const response = await this.ajax(url, 'POST', { teamId });
+            const endpoint = `v2/organizations/${this.organizationId}/credentials/ios/certificate/generate`);
+            const response = await Fliplet.API.request(endpoint, 'POST', { teamId });
             
             return {
                 success: true,
@@ -465,9 +450,9 @@ class PublishingService {
         }
         
         try {
-            const url = this.buildURL(`v2/organizations/${this.organizationId}/credentials/ios/certificate/upload`);
+            const endpoint = `v2/organizations/${this.organizationId}/credentials/ios/certificate/upload`);
             const payload = { teamId, ...certificateData };
-            const response = await this.ajax(url, 'PUT', payload);
+            const response = await Fliplet.API.request(endpoint, 'PUT', payload);
             
             return {
                 success: true,
@@ -488,8 +473,8 @@ class PublishingService {
         }
         
         try {
-            const url = this.buildURL(`v2/organizations/${this.organizationId}/apple/bundle-ids`);
-            const response = await this.ajax(url, 'GET', { teamId });
+            const endpoint = `v2/organizations/${this.organizationId}/apple/bundle-ids`);
+            const response = await Fliplet.API.request(endpoint, 'GET', { teamId });
             
             return {
                 success: true,
@@ -509,8 +494,8 @@ class PublishingService {
         }
         
         try {
-            const url = this.buildURL(`v2/organizations/${this.organizationId}/apple/bundle-ids/${bundleId}`);
-            const response = await this.ajax(url, 'GET', { teamId });
+            const endpoint = `v2/organizations/${this.organizationId}/apple/bundle-ids/${bundleId}`);
+            const response = await Fliplet.API.request(endpoint, 'GET', { teamId });
             
             return {
                 success: true,
@@ -535,8 +520,8 @@ class PublishingService {
             formData.append('keystore', keystoreFile);
             formData.append('password', password);
             
-            const url = this.buildURL(`v2/apps/${this.appId}/submissions/${submissionId}/keystore`);
-            const response = await this.ajax(url, 'POST', formData, true);
+            const endpoint = `v2/apps/${this.appId}/submissions/${submissionId}/keystore`);
+            const response = await Fliplet.API.request(endpoint, 'POST', formData, true);
             
             return {
                 success: true,
@@ -577,8 +562,8 @@ class PublishingService {
         }
         
         try {
-            const url = this.buildURL(`v2/apps/${this.appId}/submissions/${submissionId}/store`);
-            const response = await this.ajax(url, 'PUT', payload);
+            const endpoint = `v2/apps/${this.appId}/submissions/${submissionId}/store`);
+            const response = await Fliplet.API.request(endpoint, 'PUT', payload);
             
             // Update current submission
             if (this.currentSubmission) {
@@ -599,8 +584,8 @@ class PublishingService {
      */
     async getPushConfig() {
         try {
-            const url = this.buildURL(`v1/widget-instances/com.fliplet.push-notifications/settings`);
-            const response = await this.ajax(url, 'GET');
+            const endpoint = `v1/widget-instances/com.fliplet.push-notifications/settings`);
+            const response = await Fliplet.API.request(endpoint, 'GET');
             
             return {
                 success: true,
@@ -625,8 +610,8 @@ class PublishingService {
         }
         
         try {
-            const url = this.buildURL(`v2/organizations/${this.organizationId}/credentials/push/${teamId}`);
-            const response = await this.ajax(url, 'GET');
+            const endpoint = `v2/organizations/${this.organizationId}/credentials/push/${teamId}`);
+            const response = await Fliplet.API.request(endpoint, 'GET');
             
             return {
                 success: true,
@@ -647,8 +632,8 @@ class PublishingService {
      */
     async configurePushNotifications(pushConfig) {
         try {
-            const url = this.buildURL(`v1/widget-instances/com.fliplet.push-notifications/settings`);
-            const response = await this.ajax(url, 'PUT', pushConfig);
+            const endpoint = `v1/widget-instances/com.fliplet.push-notifications/settings`);
+            const response = await Fliplet.API.request(endpoint, 'PUT', pushConfig);
             
             return {
                 success: true,
@@ -664,9 +649,9 @@ class PublishingService {
      */
     async submitPushConfig(submissionId, configType = 'PUSH_CONFIG') {
         try {
-            const url = this.buildURL(`v2/apps/${this.appId}/submissions/${submissionId}/metadata`);
+            const endpoint = `v2/apps/${this.appId}/submissions/${submissionId}/metadata`);
             const payload = { type: configType };
-            const response = await this.ajax(url, 'PUT', payload);
+            const response = await Fliplet.API.request(endpoint, 'PUT', payload);
             
             // Update current submission
             if (this.currentSubmission) {
@@ -696,8 +681,8 @@ class PublishingService {
                 formData.append(`file${index}`, file);
             });
             
-            const url = this.buildURL(`v1/media/files?appId=${this.appId}`);
-            const response = await this.ajax(url, 'POST', formData, true);
+            const endpoint = `v1/media/files?appId=${this.appId}`);
+            const response = await Fliplet.API.request(endpoint, 'POST', formData, true);
             
             return {
                 success: true,
@@ -720,8 +705,8 @@ class PublishingService {
         }
         
         try {
-            const url = this.buildURL(`v2/apps/${this.appId}/submissions/${submissionId}/metadata`);
-            const response = await this.ajax(url, 'PUT', metadataPayload);
+            const endpoint = `v2/apps/${this.appId}/submissions/${submissionId}/metadata`);
+            const response = await Fliplet.API.request(endpoint, 'PUT', metadataPayload);
             
             // Update current submission
             if (this.currentSubmission) {
@@ -747,8 +732,8 @@ class PublishingService {
         }
         
         try {
-            const url = this.buildURL(`v2/apps/${this.appId}/submissions/${submissionId}/build`);
-            const response = await this.ajax(url, 'POST');
+            const endpoint = `v2/apps/${this.appId}/submissions/${submissionId}/build`);
+            const response = await Fliplet.API.request(endpoint, 'POST');
             
             // Update current submission
             if (this.currentSubmission) {
@@ -771,8 +756,8 @@ class PublishingService {
      */
     async cancelBuild(submissionId) {
         try {
-            const url = this.buildURL(`v2/apps/${this.appId}/submissions/${submissionId}/cancel`);
-            const response = await this.ajax(url, 'POST');
+            const endpoint = `v2/apps/${this.appId}/submissions/${submissionId}/cancel`);
+            const response = await Fliplet.API.request(endpoint, 'POST');
             
             // Update current submission
             if (this.currentSubmission) {
@@ -793,8 +778,8 @@ class PublishingService {
      */
     async getSubmissionById(submissionId) {
         try {
-            const url = this.buildURL(`v2/apps/${this.appId}/submissions/${submissionId}`);
-            const response = await this.ajax(url, 'GET');
+            const endpoint = `v2/apps/${this.appId}/submissions/${submissionId}`);
+            const response = await Fliplet.API.request(endpoint, 'GET');
             
             return {
                 success: true,
@@ -815,8 +800,8 @@ class PublishingService {
         if (status) params.status = status;
         
         try {
-            const url = this.buildURL(`v2/apps/${this.appId}/submissions`);
-            const response = await this.ajax(url, 'GET', params);
+            const endpoint = `v2/apps/${this.appId}/submissions`);
+            const response = await Fliplet.API.request(endpoint, 'GET', params);
             
             return {
                 success: true,
