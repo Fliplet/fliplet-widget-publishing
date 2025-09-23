@@ -1,6 +1,6 @@
 {
   "name": "publishing",
-  "package": "publishing",
+  "package": "com.fliplet.publishing",
   "version": "1.0.0",
   "description": "",
   "icon": "img/icon.png",

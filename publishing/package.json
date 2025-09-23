@@ -1,7 +1,6 @@
 {
   "name": "publishing",
   "version": "1.0.0",
-  "package": "com.fliplet.publishing",
   "description": "publishing",
   "author": "",
   "private": true,
