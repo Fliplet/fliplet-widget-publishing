@@ -2,7 +2,6 @@
   "name": "publishing",
   "package": "com.fliplet.publishing",
   "version": "1.0.0",
-  "description": "",
   "icon": "img/icon.png",
   "tags": ["type:component", "category:general"],
   "provider_only": false,
@@ -10,19 +9,23 @@
   "html_tag": "div",
   "interface": {
     "dependencies": [
-      "vue.js",
       "fliplet-core",
       "fliplet-studio-ui"
     ],
     "assets": [
-      "dist/css/index.css",
-      "dist/app.js"
+      "js/interface.js"
     ]
   },
   "build": {
     "dependencies": [
-      "fliplet-core"
+      "jquery",
+      "bootstrap"
     ],
-    "assets": []
+    "assets": [
+      "css/build.css",
+      "js/libs.js",
+      "js/build.js"
+    ],
+    "appAssets": []
   }
 }
