@@ -832,5 +832,8 @@ class PublishingService {
 if (typeof module !== 'undefined' && module.exports) {
     module.exports = PublishingService;
 } else if (typeof window !== 'undefined') {
-    window.PublishingService = PublishingService;
+    // Only set if not already defined to avoid conflicts
+    if (!window.PublishingService) {
+        window.PublishingService = PublishingService;
+    }
 }
