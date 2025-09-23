@@ -52,12 +52,20 @@ Fliplet.Widget.instance('com-fliplet-publishing', function (data) {
   
   function init() {
     try {
-      // Get app configuration from Fliplet
+      // Get app configuration from query parameters or user environment
       var config = {
-        appId: Fliplet.Env.get('appId'),
-        token: Fliplet.Env.get('apiToken') || 'demo-token',
-        region: Fliplet.Env.get('region') || 'eu'
+        appId: Fliplet.Navigate.query.appId,
+        token: Fliplet.Navigate.query.token || (Fliplet.Env.get('user') && Fliplet.Env.get('user').auth_token),
+        region: Fliplet.Navigate.query.region || 'eu'
       };
+      
+      // Validate required parameters
+      if (!config.appId) {
+        throw new Error('appId is required. Please provide it as a query parameter: ?appId=YOUR_APP_ID');
+      }
+      if (!config.token) {
+        throw new Error('Authentication token is required. Please provide it as query parameter or ensure user is logged in.');
+      }
       
       // Initialize publishing service
       state.service = new PublishingService({
