@@ -38,6 +38,8 @@ Fliplet.Widget.instance('com-fliplet-publishing', function (data) {
   var element = this;
   var $element = $(element);
   
+  console.log('Publishing widget instance created with data:', data);
+  
   // Widget state
   var state = {
     service: null,
@@ -47,11 +49,22 @@ Fliplet.Widget.instance('com-fliplet-publishing', function (data) {
     organizationId: null
   };
   
-  // Initialize widget
-  init();
+  // Wait for Fliplet to be ready before initializing
+  Fliplet().then(function() {
+    console.log('Fliplet is ready, initializing publishing widget...');
+    init();
+  }).catch(function(error) {
+    console.error('Failed to wait for Fliplet ready:', error);
+    // Try to initialize anyway
+    init();
+  });
   
   function init() {
     try {
+      console.log('Publishing widget initializing...');
+      console.log('Fliplet.Navigate.query:', Fliplet.Navigate.query);
+      console.log('Fliplet.Env.get("user"):', Fliplet.Env.get('user'));
+      
       // Get app configuration from query parameters or user environment
       var config = {
         appId: Fliplet.Navigate.query.appId,
@@ -59,26 +72,36 @@ Fliplet.Widget.instance('com-fliplet-publishing', function (data) {
         region: Fliplet.Navigate.query.region || 'eu'
       };
       
+      console.log('Publishing widget config:', config);
+      
       // Validate required parameters
       if (!config.appId) {
+        console.error('appId is missing from query parameters');
         throw new Error('appId is required. Please provide it as a query parameter: ?appId=YOUR_APP_ID');
       }
       if (!config.token) {
+        console.error('token is missing from query parameters and user environment');
         throw new Error('Authentication token is required. Please provide it as query parameter or ensure user is logged in.');
       }
       
       // Initialize publishing service
+      console.log('Creating PublishingService with config:', config);
       state.service = new PublishingService({
         appId: config.appId,
         token: config.token,
         region: config.region
       });
+      console.log('PublishingService created successfully');
       
       // Set up screen management
+      console.log('Setting up screens...');
       setupScreens();
       
       // Show initial screen
+      console.log('Showing platform-selection screen...');
       showScreen('platform-selection');
+      
+      console.log('Publishing widget initialization completed successfully');
       
     } catch (error) {
       console.error('Failed to initialize publishing widget:', error);
@@ -343,22 +366,34 @@ Fliplet.Widget.instance('com-fliplet-publishing', function (data) {
   
   // Platform Status Functions
   async function loadPlatformStatuses() {
-    if (!state.service) return;
+    console.log('loadPlatformStatuses called, state.service:', state.service);
+    if (!state.service) {
+      console.error('PublishingService not available, cannot load platform statuses');
+      return;
+    }
     
     // Check both iOS and Android statuses in parallel
     const platforms = ['ios', 'android'];
+    console.log('Loading platform statuses for:', platforms);
     
     for (const platform of platforms) {
       try {
+        console.log(`Loading status for platform: ${platform}`);
         updatePlatformStatus(platform, 'checking', 'Checking status...');
+        
+        console.log(`Calling getSubmissionState for platform: ${platform}`);
         const submissionState = await state.service.getSubmissionState(platform);
+        console.log(`Received submission state for ${platform}:`, submissionState);
+        
         updatePlatformDisplay(platform, submissionState);
+        console.log(`Updated display for platform: ${platform}`);
       } catch (error) {
         console.error(`Failed to load ${platform} status:`, error);
         updatePlatformStatus(platform, 'not-started', 'Ready to start');
         updatePlatformProgress(platform, 'initialize', []);
       }
     }
+    console.log('Platform statuses loading completed');
   }
   
   function updatePlatformDisplay(platform, submissionState) {
