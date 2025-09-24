@@ -91,7 +91,7 @@ Fliplet.Widget.instance('com-fliplet-publishing', function (data) {
   }
   
   // Step Management Functions
-  async function loadStep(stepName) {
+  function loadStep(stepName) {
     try {
       var $container = $element.find('#step-container');
       
@@ -105,11 +105,8 @@ Fliplet.Widget.instance('com-fliplet-publishing', function (data) {
       
       $stepElement.removeClass('d-none');
       
-      // Load step CSS
-      await loadStepCSS(stepName);
-      
-      // Load and initialize step JS
-      await loadStepJS(stepName, $stepElement);
+      // Initialize step JS (CSS and JS are already loaded via widget.json)
+      initializeStep(stepName, $stepElement);
       
       state.currentStep = stepName;
       
@@ -120,67 +117,40 @@ Fliplet.Widget.instance('com-fliplet-publishing', function (data) {
   }
   
   
-  function loadStepCSS(stepName) {
-    return new Promise(function(resolve) {
-      // Check if CSS is already loaded
-      if ($('link[href*="' + stepName + '.css"]').length > 0) {
-        resolve();
-        return;
+  function initializeStep(stepName, $container) {
+    // Initialize step based on step name (JS files already loaded via widget.json)
+    if (stepName === 'dashboard') {
+      state.stepInstance = new DashboardStep(state.service, $container);
+      
+      // Listen for navigation events
+      $container.on('dashboard:navigate', function(event, data) {
+        state.selectedPlatform = data.platform;
+        loadStep(data.nextStep);
+      });
+      
+      state.stepInstance.init();
+    } else if (stepName === 'ios-api-key') {
+      state.stepInstance = new IOSAPIKeyStep(state.service, $container);
+      
+      // Listen for navigation events
+      $container.on('ios-api-key:navigate', function(event, data) {
+        if (data.submissionId) {
+          state.submissionId = data.submissionId;
+        }
+        if (data.platform) {
+          state.selectedPlatform = data.platform;
+        }
+        loadStep(data.nextStep);
+      });
+      
+      // Pass existing submission ID if available
+      if (state.submissionId) {
+        state.stepInstance.setSubmissionId(state.submissionId);
       }
       
-      var link = document.createElement('link');
-      link.rel = 'stylesheet';
-      link.href = 'css/' + stepName + '.css';
-      link.onload = resolve;
-      link.onerror = resolve; // Don't fail if CSS doesn't load
-      document.head.appendChild(link);
-    });
-  }
-  
-  function loadStepJS(stepName, $container) {
-    return new Promise(function(resolve, reject) {
-      $.getScript('js/' + stepName + '.js')
-        .done(function() {
-          // Initialize step based on step name
-          if (stepName === 'dashboard') {
-            state.stepInstance = new DashboardStep(state.service, $container);
-            
-            // Listen for navigation events
-            $container.on('dashboard:navigate', function(event, data) {
-              state.selectedPlatform = data.platform;
-              loadStep(data.nextStep);
-            });
-            
-            state.stepInstance.init();
-          } else if (stepName === 'ios-api-key') {
-            state.stepInstance = new IOSAPIKeyStep(state.service, $container);
-            
-            // Listen for navigation events
-            $container.on('ios-api-key:navigate', function(event, data) {
-              if (data.submissionId) {
-                state.submissionId = data.submissionId;
-              }
-              if (data.platform) {
-                state.selectedPlatform = data.platform;
-              }
-              loadStep(data.nextStep);
-            });
-            
-            // Pass existing submission ID if available
-            if (state.submissionId) {
-              state.stepInstance.setSubmissionId(state.submissionId);
-            }
-            
-            state.stepInstance.init();
-          }
-          // Add other step initializations here
-          
-          resolve();
-        })
-        .fail(function() {
-          reject(new Error('Failed to load JavaScript for step: ' + stepName));
-        });
-    });
+      state.stepInstance.init();
+    }
+    // Add other step initializations here
   }
   
   function setupScreens() {
