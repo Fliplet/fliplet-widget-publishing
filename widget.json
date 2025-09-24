@@ -23,9 +23,13 @@
     ],
     "assets": [
       "css/build.css",
+      "css/dashboard.css",
+      "css/ios-api-key.css",
       "js/libs.js",
       "js/publishing-service.js",
-      "js/build.js"
+      "js/build.js",
+      "js/dashboard.js",
+      "js/ios-api-key.js"
     ],
     "appAssets": []
   }

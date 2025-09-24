@@ -95,15 +95,21 @@ Fliplet.Widget.instance('com-fliplet-publishing', function (data) {
     try {
       var $container = $element.find('#step-container');
       
-      // Load step HTML
-      var stepHTML = await loadStepHTML(stepName);
-      $container.html(stepHTML);
+      // Hide all steps and show the requested one
+      $container.find('.step-content').addClass('d-none');
+      var $stepElement = $container.find('#' + stepName + '-step');
+      
+      if ($stepElement.length === 0) {
+        throw new Error('Step not found: ' + stepName);
+      }
+      
+      $stepElement.removeClass('d-none');
       
       // Load step CSS
       await loadStepCSS(stepName);
       
       // Load and initialize step JS
-      await loadStepJS(stepName, $container);
+      await loadStepJS(stepName, $stepElement);
       
       state.currentStep = stepName;
       
@@ -113,15 +119,6 @@ Fliplet.Widget.instance('com-fliplet-publishing', function (data) {
     }
   }
   
-  function loadStepHTML(stepName) {
-    return new Promise(function(resolve, reject) {
-      $.get(stepName + '.html')
-        .done(resolve)
-        .fail(function() {
-          reject(new Error('Failed to load HTML for step: ' + stepName));
-        });
-    });
-  }
   
   function loadStepCSS(stepName) {
     return new Promise(function(resolve) {
