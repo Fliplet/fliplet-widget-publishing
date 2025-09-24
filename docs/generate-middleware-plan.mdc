@@ -1,0 +1,428 @@
+---
+description: Generating Middleware Architecture Plans from REST API Documentation
+globs:
+alwaysApply: false
+---
+# Rule: Generating Middleware Architecture Plans from REST API Documentation
+
+## Goal
+
+To guide an AI assistant in analyzing REST API documentation and creating a comprehensive middleware architecture plan that serves as the foundation for subsequent task generation and implementation. The plan ensures proper workflow enforcement, data integrity, and UI-agnostic design.
+
+## Output
+
+- **Format:** Markdown (`.md`)
+- **Location:** `/tasks/`
+- **Filename:** `middleware-plan-[project-name].md`
+- **Purpose:** Comprehensive architecture plan ready for task generation
+
+## Process
+
+1. **Analyze API Documentation:** Read and thoroughly analyze all provided REST API documentation files
+2. **Identify System Patterns:** Extract workflows, dependencies, data structures, and business rules
+3. **Design Architecture:** Create a complete middleware architecture that enforces proper sequencing
+4. **Map Components:** Define all classes, services, and controllers needed
+5. **Plan Integration:** Design how components will work together
+6. **Generate Plan Document:** Create structured markdown plan ready for task generation
+
+## Input Requirements
+
+The AI should analyze the following from API documentation:
+
+### API Documentation Files
+- **API Endpoints:** Complete endpoint documentation with request/response schemas
+- **API Flows:** Workflow sequences and dependencies
+- **Sequence Diagrams:** Visual workflow representations
+- **Implementation Guidelines:** Frontend integration patterns
+
+### Key Analysis Areas
+- **Workflow Dependencies:** Sequential steps that must be enforced
+- **Data Validation:** Required fields, types, and business rules
+- **Error Handling:** All error codes and recovery strategies
+- **State Management:** Data persistence and state transitions
+- **Authentication:** Security and authorization requirements
+
+## Architecture Plan Structure
+
+The generated plan must follow this exact structure for compatibility with `generate-tasks.mdc`:
+
+```markdown
+# Middleware Architecture Plan: [Project Name]
+
+## Overview
+[Brief description of the middleware system and its purpose]
+
+## System Architecture
+
+### Core Principles
+- Workflow Enforcement: [How sequential processes are enforced]
+- Data Integrity: [How data validation is implemented]
+- State Management: [How application state is managed]
+- Error Handling: [How errors are caught and handled]
+- API Abstraction: [How REST APIs are wrapped]
+
+### Component Hierarchy
+[Visual representation of class relationships and dependencies]
+
+## Functional Requirements
+
+### FR1: [Requirement Name]
+**Description:** [Clear description of what this component must do]
+**Dependencies:** [What other components this depends on]
+**Validation Rules:** [Data validation requirements]
+**Error Handling:** [Specific error scenarios and responses]
+
+### FR2: [Next Requirement]
+[Continue for all major functional requirements]
+
+## Technical Architecture
+
+### Core Foundation Classes
+
+#### BaseMiddleware
+**Purpose:** [Foundation class responsibilities]
+**Key Methods:** [Primary methods this class will provide]
+**Dependencies:** [What this class depends on]
+
+#### StateManager
+**Purpose:** [State management responsibilities]
+**State Schema:** [Structure of application state]
+**Validation Rules:** [State transition validation]
+
+#### ValidationEngine
+**Purpose:** [Data validation responsibilities]
+**Validation Types:** [Types of validation performed]
+**Integration:** [How it integrates with other components]
+
+### API Service Classes
+
+#### ApiClient
+**Purpose:** [HTTP communication responsibilities using Fliplet.API.request()]
+**Features:** [Authentication, retry logic, error handling via Fliplet API]
+**Configuration:** [How it wraps Fliplet.API.request() and handles responses]
+**Implementation:** Must use Fliplet.API.request() as documented at https://developers.fliplet.com/API/core/api.html.
+
+**CRITICAL IMPLEMENTATION REQUIREMENTS:**
+1. **No baseUrl needed:** Fliplet.API.request() automatically uses `Fliplet.Env.get('apiUrl')` as the default base URL, returning 'https://api.fliplet.com/' for production and 'https://staging.api.fliplet.com/' for staging etc.
+2. **Custom API URL:** Check `Fliplet.Navigate.query.apiUrl` and pass it as `{ apiUrl }` option to Fliplet.API.request() only when provided
+3. **Custom Auth Token:** Check `Fliplet.Navigate.query.auth_token` and pass it as `{ headers: { 'Auth-token': auth_token } }` option
+4. **URL handling:** Fliplet.API.request() expects base URL to end with trailing slash and endpoint to start without slash (e.g., apiUrl: 'https://api.fliplet.com/', url: 'v1/submissions')
+
+**Example Implementation Pattern:**
+```javascript
+// Constructor - no baseUrl needed
+this.config = {
+  timeout: 30000,
+  retryAttempts: 3,
+  retryDelay: 1000,
+  // ... other config
+};
+
+// Check for overrides from Fliplet.Navigate.query
+this.apiUrl = null; // Only set if custom apiUrl provided
+this.authToken = null;
+
+if (typeof Fliplet !== 'undefined' && Fliplet.Navigate && Fliplet.Navigate.query) {
+  if (Fliplet.Navigate.query.apiUrl) {
+    this.apiUrl = Fliplet.Navigate.query.apiUrl;
+  }
+  if (Fliplet.Navigate.query.auth_token) {
+    this.authToken = Fliplet.Navigate.query.auth_token;
+  }
+}
+
+// In request method
+const requestConfig = {
+  url: this.buildRequestUrl(endpoint, params), // Handles both cases
+  method: method.toUpperCase(),
+  headers: this.buildRequestHeaders(customHeaders)
+};
+
+// Add custom apiUrl only if provided
+if (this.apiUrl) {
+  requestConfig.apiUrl = this.apiUrl;
+}
+
+// buildRequestUrl method handles both cases:
+// - No custom apiUrl: return 'v1/submissions' (Fliplet.API.request() adds base URL with trailing slash)
+// - Custom apiUrl: return 'https://custom.api.com/v1/submissions' (full URL when custom apiUrl provided)
+```
+
+#### [Domain]ApiService Classes
+[For each major API domain, define:]
+**Purpose:** [What API endpoints this service wraps]
+**Methods:** [Key methods corresponding to endpoints]
+**Validation:** [Request/response validation]
+**Error Mapping:** [How API errors are handled]
+
+### Workflow Controller Classes
+
+#### WorkflowManager
+**Purpose:** [Workflow orchestration responsibilities]
+**Workflow Types:** [Different workflows it manages]
+**Dependencies:** [How it enforces sequential execution]
+
+#### [Process]Controller Classes
+[For each major workflow, define:]
+**Purpose:** [What business process this controls]
+**Steps:** [Sequential steps in the workflow]
+**Validation:** [Prerequisites and data requirements]
+**State Management:** [How workflow state is tracked]
+
+### Supporting Infrastructure
+
+#### ErrorHandler
+**Purpose:** [Error management responsibilities]
+**Error Categories:** [Types of errors handled]
+**Recovery Strategies:** [How errors are resolved]
+**User Experience:** [How errors are presented to users]
+
+#### DataMapper
+**Purpose:** [Data transformation responsibilities]
+**Transformations:** [Types of data transformation]
+**Validation:** [Data integrity checks]
+
+## API Integration Mapping
+
+### Endpoint Groups
+[Group related endpoints and map to service classes]
+
+#### [Group Name] (Maps to [ServiceClass])
+- **GET [endpoint]** → [method_name]: [purpose]
+- **POST [endpoint]** → [method_name]: [purpose]
+- **PUT [endpoint]** → [method_name]: [purpose]
+- **DELETE [endpoint]** → [method_name]: [purpose]
+
+### Workflow Sequences
+[Map API flow documentation to controller classes]
+
+#### [Workflow Name] (Maps to [ControllerClass])
+**Steps:**
+1. [Step name] → [API call] → [validation] → [state update]
+2. [Step name] → [API call] → [validation] → [state update]
+[Continue for all steps]
+
+**Dependencies:** [Prerequisites that must be satisfied]
+**Validation Points:** [Where data integrity is checked]
+**Error Handling:** [How failures are managed]
+
+## State Management Design
+
+### State Schema
+```javascript
+{
+  workflows: {
+    [workflowName]: {
+      currentStep: string,
+      progress: number,
+      data: object,
+      errors: array,
+      isComplete: boolean,
+      dependencies: array
+    }
+  },
+  cache: {
+    [apiEndpoint]: {
+      data: object,
+      timestamp: string,
+      ttl: number
+    }
+  },
+  user: {
+    // User session data
+  },
+  config: {
+    // Application configuration
+  }
+}
+```
+
+### State Transitions
+[Define valid state transitions and validation rules]
+
+### Persistence Strategy
+[How state is persisted across sessions]
+
+## Validation Framework Design
+
+### Validation Rules
+[Extract all validation requirements from API documentation]
+
+#### Field Validation
+- **Required Fields:** [List all required fields by endpoint]
+- **Data Types:** [Type validation requirements]
+- **Format Validation:** [Pattern matching requirements]
+- **Range Validation:** [Min/max values and lengths]
+
+#### Business Rules
+- **Cross-field Validation:** [Dependencies between fields]
+- **Conditional Requirements:** [Platform-specific requirements]
+- **Workflow Validation:** [Sequential step requirements]
+
+### Error Messages
+[Map all API error codes to user-friendly messages]
+
+## Error Handling Strategy
+
+### Error Categories
+1. **Validation Errors:** [Client-side validation failures]
+2. **API Errors:** [Server-side errors and responses]
+3. **Network Errors:** [Connectivity and timeout issues]
+4. **Business Logic Errors:** [Workflow and dependency failures]
+
+### Recovery Strategies
+[Define how each error category should be handled]
+
+### User Experience
+[How errors are presented and what actions users can take]
+
+## Integration Patterns
+
+### Dependency Injection
+[How components are wired together]
+
+### Event System
+[How components communicate via events]
+
+### Configuration Management
+[How the system is configured and initialized]
+
+## Testing Foundations
+
+### Framework & Conventions
+- [Selected framework and rationale, e.g., Jest for vanilla JS]
+- [Directory layout for tests, e.g., src/**/Class.test.js alongside implementation]
+- [Coverage targets and thresholds]
+
+### Setup Artifacts
+- [Configuration files to include, e.g., jest.config.js, tests/setup.js]
+- [npm scripts to add: "test", "test:watch", "test:coverage"]
+- [Mocking strategy for Fliplet APIs (e.g., MSW or stubbed globals)]
+
+### Execution & CI
+- [Commands to run tests locally]
+- [How tests are invoked in CI and required to pass before merges]
+
+## File Structure Plan
+
+```
+/src/middleware/
+├── core/
+│   ├── BaseMiddleware.js
+│   ├── StateManager.js
+│   ├── ValidationEngine.js
+│   ├── ErrorHandler.js
+│   └── DataMapper.js
+├── api/
+│   ├── ApiClient.js
+│   ├── [List all planned API service files]
+│   └── ...
+├── controllers/
+│   ├── WorkflowManager.js
+│   ├── [List all planned controller files]
+│   └── ...
+├── config/
+│   ├── endpoints.js
+│   ├── validation-rules.js
+│   ├── error-messages.js
+│   └── workflows.js
+└── middleware.js
+```
+
+## Implementation Considerations
+
+### Development Approach
+- **No Module System:** Pure vanilla JavaScript with global namespace
+- **Fliplet API Integration:** ALL HTTP requests must use Fliplet.API.request() (https://developers.fliplet.com/API/core/api.html)
+- **Dependency Injection:** Constructor-based dependency injection
+- **Event-Driven:** Event system for component communication
+- **Self-Documenting:** Comprehensive JSDoc documentation
+
+### Testing Strategy
+- **Framework Detection (existing codebases):** Before planning tests, identify if a framework already exists by checking for files like `jest.config.*`, `vitest.config.*`, test directories (`__tests__`, `tests`, `*.test.js`), and `package.json` scripts (`test`). If present, conform to existing conventions (folders, scripts, matchers, setup files).
+- **Bootstrapping (new projects):** If no framework is detected, the plan MUST include a dedicated "Testing Foundations" section that specifies:
+  - Framework: Prefer Jest for vanilla JavaScript projects
+  - Config files: `jest.config.js`, `tests/setup.js` (global stubs for `Fliplet`), and optional `tests/mocks/`
+  - Scripts: add `"test": "jest"`, `"test:watch": "jest --watch"`, `"test:coverage": "jest --coverage"` to `package.json`
+  - Test placement: colocate `*.test.js` files next to the code they verify
+  - Minimum coverage thresholds and how to enforce them
+  - How to mock Fliplet APIs (e.g., global `Fliplet` stubs or MSW when HTTP is required)
+- **Unit Tests:** One test file per class
+- **Integration Tests:** Workflow testing scenarios
+- **Mock Data:** Complete mock datasets for testing
+- **Error Simulation:** Test all error conditions
+
+### Performance Considerations
+- **Caching Strategy:** [How API responses will be cached]
+- **State Optimization:** [How state updates will be optimized]
+- **Memory Management:** [How memory usage will be controlled]
+
+## Success Metrics
+
+### Functional Success
+- **Workflow Enforcement:** Users cannot skip required steps
+- **Data Integrity:** Invalid data is caught before API calls
+- **Error Recovery:** All error conditions have proper handling
+- **State Consistency:** Application state remains valid
+
+### Technical Success
+- **API Abstraction:** UI code never directly calls REST APIs
+- **Code Reusability:** Components can be reused across projects
+- **Maintainability:** Clear separation of concerns and documentation
+- **Testability:** All components have comprehensive test coverage
+
+## Next Steps
+
+This architecture plan should be reviewed for:
+1. **Completeness:** All API endpoints and workflows covered
+2. **Accuracy:** Proper mapping of requirements to components
+3. **Feasibility:** Implementation approach is sound
+4. **Scalability:** Architecture can grow with requirements
+
+Once approved, this plan will be converted to implementation tasks using `generate-tasks.mdc`.
+```
+
+## Plan Generation Guidelines
+
+### Comprehensive Analysis
+- Read ALL provided API documentation files completely
+- Extract every endpoint, workflow, and requirement
+- Identify all dependencies and validation rules
+- Map every error condition and recovery strategy
+
+### Architecture Design
+- Ensure workflow enforcement is built into the design
+- Plan for data integrity at every level
+- Design for UI framework agnostic integration
+- Include comprehensive error handling
+
+### Documentation Quality
+- Use clear, specific language
+- Include concrete examples where helpful
+- Ensure compatibility with task generation
+- Plan for junior developer implementation
+
+### Validation Requirements
+- Extract all validation rules from API documentation
+- Include platform-specific requirements (iOS vs Android)
+- Plan for cross-field validation
+- Include business rule validation
+
+## Target Audience
+
+The generated plan should be suitable for:
+- **Senior developers** reviewing architecture decisions
+- **Junior developers** who will implement the tasks
+- **Project managers** tracking implementation progress
+- **QA engineers** understanding system behavior
+
+## Final Instructions
+
+1. **Analyze ALL API documentation** thoroughly before beginning
+2. **Create a complete architecture plan** that addresses every requirement
+3. **Ensure the plan structure** matches the required format exactly
+4. **ENFORCE Fliplet.API.request() usage** - All HTTP communication must use Fliplet.API.request()
+5. **Include specific details** that can be converted to actionable tasks
+6. **Plan for proper workflow enforcement** and data integrity
+7. **Design for vanilla JavaScript** without module systems
+8. **Prepare for task generation** by including implementation details
