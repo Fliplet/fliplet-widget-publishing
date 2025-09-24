@@ -115,7 +115,7 @@ Fliplet.Widget.instance('com-fliplet-publishing', function (data) {
   
   function loadStepHTML(stepName) {
     return new Promise(function(resolve, reject) {
-      $.get('steps/' + stepName + '/' + stepName + '.html')
+      $.get(stepName + '.html')
         .done(resolve)
         .fail(function() {
           reject(new Error('Failed to load HTML for step: ' + stepName));
@@ -133,7 +133,7 @@ Fliplet.Widget.instance('com-fliplet-publishing', function (data) {
       
       var link = document.createElement('link');
       link.rel = 'stylesheet';
-      link.href = 'steps/' + stepName + '/' + stepName + '.css';
+      link.href = 'css/' + stepName + '.css';
       link.onload = resolve;
       link.onerror = resolve; // Don't fail if CSS doesn't load
       document.head.appendChild(link);
@@ -142,7 +142,7 @@ Fliplet.Widget.instance('com-fliplet-publishing', function (data) {
   
   function loadStepJS(stepName, $container) {
     return new Promise(function(resolve, reject) {
-      $.getScript('steps/' + stepName + '/' + stepName + '.js')
+      $.getScript('js/' + stepName + '.js')
         .done(function() {
           // Initialize step based on step name
           if (stepName === 'dashboard') {
